@@ -48,11 +48,31 @@ class App extends Component {
     this.setState({top: newPos >= minTop ? newPos : minTop, deltaTop: deltaPos});
   }
 
+  updatePipes = () => {
+    const { pipes } = this.state;
+    // first remove out of bound pipes
+    const cleaned = pipes.filter(p => p.x >= -19.20);
+    const missing = (5 - cleaned.length);
+    let baseDistance = 1280;
+    const copy = [...cleaned];
+    for(let i = 0; i < missing; i++) {
+      baseDistance += 256;
+      const o = {
+        x: baseDistance,
+        height: generatePipeHeight(),
+        id: Math.random(),
+      }
+      copy.push(o)
+    };
+    const movePipes = copy.map((p) => Object.assign(p, {x: p.x - 19.20}));
+    return movePipes;
+  }
+
   updateGame = () => {
     const newFallPosition = this.fall();
-    const movePipes = this.state.pipes.map((p) => Object.assign(p, {x: p.x - 19.20}));
+    const newPipes = this.updatePipes();
 
-    this.setState({top: newFallPosition.newPos, pipes: movePipes, deltaTop: newFallPosition.newDeltaPos});
+    this.setState({top: newFallPosition.newPos, pipes: newPipes, deltaTop: newFallPosition.newDeltaPos});
 
   }
 
