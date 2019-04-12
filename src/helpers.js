@@ -1,4 +1,5 @@
-export const generatePipeHeight = (min=100, max=570) => (Math.floor(Math.random() * (max - min + 1)) + min) / 2;
+export const generateRandomShift = (min= 360, max= 560) => (Math.floor(Math.random() * (max - min + 1)) + min)
+export const generateRandomEase = (min=0, max = 20) => (Math.floor(Math.random() * (max - min + 1)) + min);
 
 
 export const recordAnimationFrames = (callback) => {

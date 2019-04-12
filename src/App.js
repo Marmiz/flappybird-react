@@ -2,7 +2,7 @@ import React, { Component, Fragment } from 'react';
 import './App.css';
 import Bird from "./Components/Bird";
 import Pipe from "./Components/Pipe";
-import {generatePipeHeight} from "./helpers";
+import {generateRandomShift, generateRandomEase} from "./helpers";
 
 class App extends Component {
   state = {
@@ -15,8 +15,9 @@ class App extends Component {
     timerId : undefined,
     pipes: [{
       x: 1280,
-      height: generatePipeHeight(),
-      id: 123
+      shift: generateRandomShift(),
+      id: 123,
+      ease: generateRandomEase(),
     }],
   }
 
@@ -51,26 +52,32 @@ class App extends Component {
   updatePipes = () => {
     const { pipes } = this.state;
     // first remove out of bound pipes
-    const cleaned = pipes.filter(p => p.x >= -19.20);
-    const missing = (5 - cleaned.length);
+    const cleaned = pipes.filter(p => p.x >= -50);
+    const missing = (4 - cleaned.length);
     let baseDistance = 1280;
     const copy = [...cleaned];
     for(let i = 0; i < missing; i++) {
-      baseDistance += 256;
+      baseDistance += 451;
       const o = {
         x: baseDistance,
-        height: generatePipeHeight(),
+        shift: generateRandomShift(),
         id: Math.random(),
+        ease: generateRandomEase(),
       }
       copy.push(o)
     };
-    const movePipes = copy.map((p) => Object.assign(p, {x: p.x - 19.20}));
+    // each block should take 2s
+    const movePipes = copy.map((p) => Object.assign(p, {x: p.x - 12.66}));
     return movePipes;
   }
 
   updateGame = () => {
     const newFallPosition = this.fall();
     const newPipes = this.updatePipes();
+
+    // check collision
+    // top = pipeHeight - shift
+    // bot = shift - 50 birdHeigh
 
     this.setState({top: newFallPosition.newPos, pipes: newPipes, deltaTop: newFallPosition.newDeltaPos});
 
@@ -85,10 +92,22 @@ class App extends Component {
     }
   }
 
+  stopGame = () => {
+    const {timerId} = this.state;
+    if(!timerId) { return console.error('no timer set')}
+
+    clearInterval(timerId);
+  }
+
   handlePress = e => {
     const kc = e.keyCode;
+    console.log(kc)
     if(kc === 32) {
       this.jump();
+    }
+
+    if(kc === 80) {
+      this.stopGame();
     }
   }
 
