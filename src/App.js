@@ -2,7 +2,7 @@ import React, { Component, Fragment } from 'react';
 import './App.css';
 import Bird from "./Components/Bird";
 import Pipe from "./Components/Pipe";
-import {generateRandomShift, generateRandomEase} from "./helpers";
+import {generateRandomShift, generateRandomEase, generateBotHeight, generatePipePairs} from "./helpers";
 
 class App extends Component {
   state = {
@@ -13,12 +13,9 @@ class App extends Component {
     deltaTop: 0,
     jumpDistance: -5,
     timerId : undefined,
-    pipes: [{
-      x: 1280,
-      shift: generateRandomShift(),
-      id: 123,
-      ease: generateRandomEase(),
-    }],
+    pipes: [],
+    scorePipe: false,
+    score: 0,
   }
 
   componentDidMount() {
@@ -63,6 +60,7 @@ class App extends Component {
         shift: generateRandomShift(),
         id: Math.random(),
         ease: generateRandomEase(),
+        height: generatePipePairs(),
       }
       copy.push(o)
     };
@@ -71,22 +69,54 @@ class App extends Component {
     return movePipes;
   }
 
-  updateGame = () => {
+  updateGame = (winningPipe) => {
+    const { scorePipe, score } = this.state;
+    const newScore = scorePipe && scorePipe !== winningPipe ? score + 1 : score;
+
     const newFallPosition = this.fall();
     const newPipes = this.updatePipes();
 
-    // check collision
-    // top = pipeHeight - shift
-    // bot = shift - 50 birdHeigh
+    this.setState({
+      top: newFallPosition.newPos,
+      pipes: newPipes,
+      deltaTop: newFallPosition.newDeltaPos,
+      scorePipe: winningPipe,
+      score: newScore,
+    });
 
-    this.setState({top: newFallPosition.newPos, pipes: newPipes, deltaTop: newFallPosition.newDeltaPos});
+  }
 
+  checkGame = () => {
+    const {top, pipes} = this.state;
+    // check for collision
+    // get pipe that is in possible range for collision,
+    // an x value that goes from 20 to 120
+    const collisionPipe = pipes.filter(p => p.x >= 20 && p.x <= 120);
+    if(collisionPipe.length) {
+      const pipe = collisionPipe[0];
+      const topLimit = pipe.height[1] // give 5 pixel of grace
+      // game height - 50px of fixed gap + 5 px of grace = 675
+      // minus bot pipe height gives the bot limit
+      const botLimit = (670 - pipe.height[0] );
+
+      if(top <= topLimit || top >= botLimit) {
+        this.stopGame();
+      }
+    }
+
+    // get possible pipe we could have passed -> x > 15 && < 20
+    const winningPipe = pipes.filter(p => p.x >= 0 && p.x <= 20);
+    if(winningPipe.length) {
+      return this.updateGame(winningPipe[0].id);
+    }
+
+    this.updateGame(false);
   }
 
   startGame = () => {
     const {timerId} = this.state;
     if(!timerId) {
-      const t = setInterval(() => this.updateGame(), 16.66 );
+      const t = setInterval(() => this.checkGame(), 16.66 );
 
       this.setState({ timerId: t})
     }
@@ -101,7 +131,6 @@ class App extends Component {
 
   handlePress = e => {
     const kc = e.keyCode;
-    console.log(kc)
     if(kc === 32) {
       this.jump();
     }
@@ -112,9 +141,10 @@ class App extends Component {
   }
 
   render() {
-    const {top, pipes} = this.state;
+    const {top, pipes, score } = this.state;
     return (
       <div className="App" onClick={this.startGame}>
+        <span className="score">{score}</span>
         <Bird top={top}/>
         {
           pipes.map((p) => <Fragment key={p.id}>

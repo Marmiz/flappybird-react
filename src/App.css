@@ -8,6 +8,7 @@
   right: 0;
   top: 0;
   bottom: 0;
+  overflow: hidden;
 }
 
 .Bird {
@@ -16,7 +17,7 @@
   left: 70px;
   width: 50px;
   height: 50px;
-  border-radius: 50%;
+  border-radius: 25%;
   background-color: blueviolet;
 }
 
@@ -24,5 +25,12 @@
   position: absolute;
   width: 50px;
   background-color: lightcoral;
-  height: 650px;
+}
+
+.bottom {
+  bottom: 0;
+}
+
+.top {
+  top: 0;
 }

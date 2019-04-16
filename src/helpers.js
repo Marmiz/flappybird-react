@@ -1,6 +1,17 @@
 export const generateRandomShift = (min= 360, max= 560) => (Math.floor(Math.random() * (max - min + 1)) + min)
-export const generateRandomEase = (min=0, max = 20) => (Math.floor(Math.random() * (max - min + 1)) + min);
+export const generateRandomEase = (min=80, max = 100) => (Math.floor(Math.random() * (max - min + 1)) + min);
 
+export const generateBotHeight = (min=240, max=480) => (Math.floor(Math.random() * (max - min + 1)) + min);
+
+
+export const generatePipePairs = () => {
+  const botH = generateBotHeight();
+  const ease = generateRandomEase();
+
+
+  const topH = (720 - 50 - ease - botH);
+  return [botH, topH, ease];
+}
 
 export const recordAnimationFrames = (callback) => {
   let fps = 60,
