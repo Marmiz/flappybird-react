@@ -20,7 +20,7 @@ self.__precacheManifest = [
     "url": "/flappybird-react/static/media/PressStart2P-Regular.81c0aae9.ttf"
   },
   {
-    "revision": "46dad341d904387a4d38e2e1f05b20eb",
+    "revision": "b04115878021f1c9f3e60926d162b892",
     "url": "/flappybird-react/index.html"
   }
 ];

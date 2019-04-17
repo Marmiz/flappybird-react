@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/3.6.3/workbox-sw.js");
 
 importScripts(
-  "/flappybird-react/precache-manifest.2fe9b8c69a0c7bb200ee8be4323e56a8.js"
+  "/flappybird-react/precache-manifest.a70af058872391af5a071a0e1fe13a84.js"
 );
 
 workbox.clientsClaim();
