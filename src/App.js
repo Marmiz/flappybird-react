@@ -2,10 +2,13 @@ import React, { Component, Fragment } from 'react';
 import './App.css';
 import Bird from "./Components/Bird";
 import Pipe from "./Components/Pipe";
-import {generateRandomShift, generateRandomEase, generateBotHeight, generatePipePairs} from "./helpers";
+import Controls from "./Components/Controls";
+import Score from "./Components/Score";
+import { generatePipePairs, initialState } from "./helpers";
 
 class App extends Component {
   state = {
+    gameRunning: false,
     minTop: 0,
     maxBot: 670,
     top: 60,
@@ -57,9 +60,7 @@ class App extends Component {
       baseDistance += 451;
       const o = {
         x: baseDistance,
-        shift: generateRandomShift(),
         id: Math.random(),
-        ease: generateRandomEase(),
         height: generatePipePairs(),
       }
       copy.push(o)
@@ -94,17 +95,18 @@ class App extends Component {
     const collisionPipe = pipes.filter(p => p.x >= 20 && p.x <= 120);
     if(collisionPipe.length) {
       const pipe = collisionPipe[0];
-      const topLimit = pipe.height[1] // give 5 pixel of grace
+      const topLimit = pipe.height[1]
+      // give 5 pixel of grace
       // game height - 50px of fixed gap + 5 px of grace = 675
       // minus bot pipe height gives the bot limit
       const botLimit = (670 - pipe.height[0] );
 
-      if(top <= topLimit || top >= botLimit) {
-        this.stopGame();
+      if(top <= topLimit - 5 || top >= botLimit + 5) {
+        return this.stopGame();
       }
     }
 
-    // get possible pipe we could have passed -> x > 15 && < 20
+    // get possible pipe we could have passed -> x > 0 && < 20
     const winningPipe = pipes.filter(p => p.x >= 0 && p.x <= 20);
     if(winningPipe.length) {
       return this.updateGame(winningPipe[0].id);
@@ -114,37 +116,70 @@ class App extends Component {
   }
 
   startGame = () => {
-    const {timerId} = this.state;
-    if(!timerId) {
       const t = setInterval(() => this.checkGame(), 16.66 );
-
-      this.setState({ timerId: t})
-    }
+      this.setState({ timerId: t, gameRunning: true })
   }
 
-  stopGame = () => {
+  stopGame = (pause) => {
     const {timerId} = this.state;
     if(!timerId) { return console.error('no timer set')}
 
     clearInterval(timerId);
+    const gameState = pause ? 'pause' : false;
+    this.setState({ gameRunning: gameState });
+  }
+
+  resetGame = () => {
+    const { gameState } = this.state;
+    if(gameState === 'pause') {
+      return this.startGame();
+    }
+
+    this.setState(initialState);
   }
 
   handlePress = e => {
+    const { gameRunning } = this.state;
     const kc = e.keyCode;
+
+    // space -> Jump
     if(kc === 32) {
-      this.jump();
+      if(gameRunning) {
+        this.jump();
+      }
     }
 
+    // S -> Start
+    if(kc === 83) {
+      if(!gameRunning) {
+        this.startGame();
+      }
+    }
+
+    // P -> Pause / Unpause
     if(kc === 80) {
-      this.stopGame();
+      if(gameRunning === 'pause') {
+        return this.startGame();
+      }
+      if(gameRunning) {
+        this.stopGame(true);
+      }
+    }
+
+    // R -> Reset
+    if(kc === 82) {
+      if(!gameRunning) {
+        this.resetGame();
+      }
     }
   }
 
   render() {
     const {top, pipes, score } = this.state;
     return (
-      <div className="App" onClick={this.startGame}>
-        <span className="score">{score}</span>
+      <div className="App">
+        <Score score={score} />
+        <Controls />
         <Bird top={top}/>
         {
           pipes.map((p) => <Fragment key={p.id}>
